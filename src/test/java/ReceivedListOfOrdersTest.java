@@ -1,3 +1,4 @@
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.Before;
@@ -13,11 +14,12 @@ public class ReceivedListOfOrdersTest {
     }
 
     @Test
+    @DisplayName("the response body returns a list of orders")
     public void getListOrderEmptyRequestOrderListNotNullAndStatus200() {
 
         Response response = given()
                 .get("/api/v1/orders");
 
-        response.then().statusCode(200).and().assertThat().body("orders", notNullValue());
+        response.then().assertThat().body("orders", notNullValue()).and().statusCode(200);
     }
 }

@@ -1,3 +1,4 @@
+import io.qameta.allure.Step;
 import io.restassured.response.Response;
 
 import static io.restassured.RestAssured.given;
@@ -8,18 +9,20 @@ public class ThisTestData {
     public static String passwordRandomUser = "123456";
     public static String nameRandomUser = "madaraa";
 
+    @Step("Create basic courier for use in tests")
     public static Response createCourierForTest() {
         String json = "{\"login\": \"" + loginRandomUser + "\", \"password\": \"" + passwordRandomUser
                 + "\", \"firstName\": \"" + nameRandomUser + "\"}";
 
-        Response response = given()
+        return given()
                 .header("Content-Type", "application/json")
                 .body(json)
                 .post("/api/v1/courier");
 
-        return response;
+
     }
 
+    @Step("Login basic courier for use in tests and save id for delete")
     public static Response loginCourierForSaveId() {
         String json = "{\"login\": \"" + loginRandomUser + "\", \"password\": \"" + passwordRandomUser + "\"}";
 
@@ -33,6 +36,7 @@ public class ThisTestData {
         return response;
     }
 
+    @Step("Delete basic courier after use in tests and save id")
     public static void deleteCourierForTest() {
         loginCourierForSaveId();
 

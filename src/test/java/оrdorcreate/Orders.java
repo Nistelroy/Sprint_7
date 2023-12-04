@@ -11,9 +11,10 @@ public class Orders {
     private String rentTime;
     private String deliveryDate;
     private String comment;
-    private List<String>  color;
+    private List<String> color;
 
-    public Orders(String firstName, String lastName, String address, String metroStation, String phone, String rentTime, String deliveryDate, String comment,List<String>  color) {
+    public Orders(String firstName, String lastName, String address, String metroStation, String phone,
+                  String rentTime, String deliveryDate, String comment, List<String> color) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
@@ -92,11 +93,11 @@ public class Orders {
         this.comment = comment;
     }
 
-    public List<String>  getColor() {
+    public List<String> getColor() {
         return color;
     }
 
-    public void setColor(List<String>  color) {
+    public void setColor(List<String> color) {
         this.color = color;
     }
 }

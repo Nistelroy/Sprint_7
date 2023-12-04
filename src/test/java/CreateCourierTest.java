@@ -1,13 +1,17 @@
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Random;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 
 public class CreateCourierTest {
+    private int randomInt = new Random().nextInt();
 
     @Before
     public void setUp() {
@@ -15,6 +19,7 @@ public class CreateCourierTest {
     }
 
     @Test
+    @DisplayName("courier creation check")
     public void createCourierCorrectDataStatus201() {
 
         Response response = ThisTestData.createCourierForTest();
@@ -24,6 +29,7 @@ public class CreateCourierTest {
     }
 
     @Test
+    @DisplayName("checking that it is impossible to create two identical couriers")
     public void createTwoCourierSameDataStatus409() {
         ThisTestData.createCourierForTest();
         Response response = ThisTestData.createCourierForTest();
@@ -33,8 +39,11 @@ public class CreateCourierTest {
     }
 
     @Test
+    @DisplayName("verification to create a courier, you need to submit all required fields")
+    @Description("need password")
     public void needAllDataForCreateCourierNoPasswordStatus400() {
-        String json = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"firstName\": \"" + ThisTestData.nameRandomUser + "\"}";
+        String json = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"firstName\": \""
+                + ThisTestData.nameRandomUser + "\"}";
 
         Response response = given()
                 .header("Content-Type", "application/json")
@@ -45,8 +54,11 @@ public class CreateCourierTest {
     }
 
     @Test
+    @DisplayName("verification to create a courier, you need to submit all required fields")
+    @Description("need login")
     public void needAllDataForCreateCourierNoLoginStatus400() {
-        String json = "{\"password\": \"" + ThisTestData.passwordRandomUser + "\", \"firstName\": \"" + ThisTestData.nameRandomUser + "\"}";
+        String json = "{\"password\": \"" + ThisTestData.passwordRandomUser + "\", \"firstName\": \""
+                + ThisTestData.nameRandomUser + "\"}";
 
         Response response = given()
                 .header("Content-Type", "application/json")
@@ -57,6 +69,7 @@ public class CreateCourierTest {
     }
 
     @Test
+    @DisplayName("a successful request returns ok: true")
     public void createCourierCorrectDataResponseContainsTrue() {
         Response response = ThisTestData.createCourierForTest();
 
@@ -64,11 +77,12 @@ public class CreateCourierTest {
         ThisTestData.deleteCourierForTest();
     }
 
-
     @Test
+    @DisplayName("create a user with a login that you no longer have")
     public void createCourierBusyLoginStatus409() {
         ThisTestData.createCourierForTest();
-        String busyLoginJson = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"password\": \"12345112\", \"firstName\": \""
+        String busyLoginJson = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"password\": \""
+                + (ThisTestData.passwordRandomUser + randomInt) + "\", \"firstName\": \""
                 + ThisTestData.nameRandomUser + "\"}"; //Неправильный пароль
 
         Response response = given()
@@ -79,8 +93,6 @@ public class CreateCourierTest {
         response.then().statusCode(409);
         ThisTestData.deleteCourierForTest();
     }
-
-
 }
 
 
