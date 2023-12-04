@@ -24,16 +24,6 @@ public class CreateCourierTest {
     }
 
     @Test
-    public void loginCourierCorrectDataIdNotNullAndStatus200() {
-
-        ThisTestData.createCourierForTest();
-        Response response = ThisTestData.loginCourierForSaveId();
-
-        response.then().assertThat().body("id", notNullValue()).and().statusCode(200);
-        ThisTestData.deleteCourierForTest();
-    }
-
-    @Test
     public void createTwoCourierSameDataStatus409() {
         ThisTestData.createCourierForTest();
         Response response = ThisTestData.createCourierForTest();
@@ -74,61 +64,6 @@ public class CreateCourierTest {
         ThisTestData.deleteCourierForTest();
     }
 
-    @Test
-    public void loginCourierWrongPasswordStatus404() {
-        String json = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"password\": \"1234\"}"; //неправильный пароль
-
-        ThisTestData.createCourierForTest();
-        Response response = given()
-                .contentType("application/json")
-                .body(json)
-                .post("/api/v1/courier/login");
-
-        response.then().statusCode(404);
-        ThisTestData.deleteCourierForTest();
-    }
-
-    @Test
-    public void loginCourierWrongLoginStatus404() {
-        String json = "{\"login\": \"dpetro\", \"password\": \"" + ThisTestData.passwordRandomUser + "\"}"; //неправильный логин
-
-        ThisTestData.createCourierForTest();
-        Response response = given()
-                .contentType("application/json")
-                .body(json)
-                .post("/api/v1/courier/login");
-
-        response.then().statusCode(404);
-        ThisTestData.deleteCourierForTest();
-    }
-
-    @Test
-    public void loginCourierNoLoginStatus400() {
-        String json = "{\"login\": \"\", \"password\": \"12345\"}"; //пустой логин
-
-        ThisTestData.createCourierForTest();
-        Response response = given()
-                .contentType("application/json")
-                .body(json)
-                .post("/api/v1/courier/login");
-
-        response.then().statusCode(400);
-        ThisTestData.deleteCourierForTest();
-    }
-
-    @Test
-    public void loginCourierNoPasswordStatus400() {
-        String json = "{\"login\": \"dpetrov\", \"password\": \"\"}"; //пустой пароль
-
-        ThisTestData.createCourierForTest();
-        Response response = given()
-                .contentType("application/json")
-                .body(json)
-                .post("/api/v1/courier/login");
-
-        response.then().statusCode(400);
-        ThisTestData.deleteCourierForTest();
-    }
 
     @Test
     public void createCourierBusyLoginStatus409() {
