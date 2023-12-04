@@ -8,7 +8,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
 public class CreateCourierTest {
-    int idCourier;
 
     @Before
     public void setUp() {
@@ -18,34 +17,34 @@ public class CreateCourierTest {
     @Test
     public void createCourierCorrectDataStatus201() {
 
-        Response response = createCourierForTest();
+        Response response = ThisTestData.createCourierForTest();
 
         response.then().statusCode(201);
-        deleteCourierForTest();
+        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     public void loginCourierCorrectDataIdNotNullAndStatus200() {
 
-        createCourierForTest();
-        Response response = loginCourierForSvaeId();
+        ThisTestData.createCourierForTest();
+        Response response = ThisTestData.loginCourierForSaveId();
 
         response.then().assertThat().body("id", notNullValue()).and().statusCode(200);
-        deleteCourierForTest();
+        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     public void createTwoCourierSameDataStatus409() {
-        createCourierForTest();
-        Response response = createCourierForTest();
+        ThisTestData.createCourierForTest();
+        Response response = ThisTestData.createCourierForTest();
         response.then().statusCode(409);
 
-        deleteCourierForTest();
+        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     public void needAllDataForCreateCourierNoPasswordStatus400() {
-        String json = "{\"login\": \"dpetrov\", \"firstName\": \"madara\"}";
+        String json = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"firstName\": \"" + ThisTestData.nameRandomUser + "\"}";
 
         Response response = given()
                 .header("Content-Type", "application/json")
@@ -57,7 +56,7 @@ public class CreateCourierTest {
 
     @Test
     public void needAllDataForCreateCourierNoLoginStatus400() {
-        String json = "{\"password\": \"12345\", \"firstName\": \"madara\"}";
+        String json = "{\"password\": \"" + ThisTestData.passwordRandomUser + "\", \"firstName\": \"" + ThisTestData.nameRandomUser + "\"}";
 
         Response response = given()
                 .header("Content-Type", "application/json")
@@ -68,73 +67,74 @@ public class CreateCourierTest {
     }
 
     @Test
-    public void createCourierCorrectDataResponseСontainsTrue() {
-        Response response = createCourierForTest();
+    public void createCourierCorrectDataResponseContainsTrue() {
+        Response response = ThisTestData.createCourierForTest();
 
         response.then().assertThat().body("ok", equalTo(true));
-        deleteCourierForTest();
+        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     public void loginCourierWrongPasswordStatus404() {
-        String json = "{\"login\": \"dpetrov\", \"password\": \"1234\"}";
+        String json = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"password\": \"1234\"}"; //неправильный пароль
 
-        createCourierForTest();
+        ThisTestData.createCourierForTest();
         Response response = given()
                 .contentType("application/json")
                 .body(json)
                 .post("/api/v1/courier/login");
 
         response.then().statusCode(404);
-        deleteCourierForTest();
+        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     public void loginCourierWrongLoginStatus404() {
-        String json = "{\"login\": \"dpetro\", \"password\": \"12345\"}";
+        String json = "{\"login\": \"dpetro\", \"password\": \"" + ThisTestData.passwordRandomUser + "\"}"; //неправильный логин
 
-        createCourierForTest();
+        ThisTestData.createCourierForTest();
         Response response = given()
                 .contentType("application/json")
                 .body(json)
                 .post("/api/v1/courier/login");
 
         response.then().statusCode(404);
-        deleteCourierForTest();
+        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     public void loginCourierNoLoginStatus400() {
-        String json = "{\"login\": \"\", \"password\": \"12345\"}";
+        String json = "{\"login\": \"\", \"password\": \"12345\"}"; //пустой логин
 
-        createCourierForTest();
+        ThisTestData.createCourierForTest();
         Response response = given()
                 .contentType("application/json")
                 .body(json)
                 .post("/api/v1/courier/login");
 
         response.then().statusCode(400);
-        deleteCourierForTest();
+        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     public void loginCourierNoPasswordStatus400() {
-        String json = "{\"login\": \"dpetrov\", \"password\": \"\"}";
+        String json = "{\"login\": \"dpetrov\", \"password\": \"\"}"; //пустой пароль
 
-        createCourierForTest();
+        ThisTestData.createCourierForTest();
         Response response = given()
                 .contentType("application/json")
                 .body(json)
                 .post("/api/v1/courier/login");
 
         response.then().statusCode(400);
-        deleteCourierForTest();
+        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     public void createCourierBusyLoginStatus409() {
-        createCourierForTest();
-        String busyLoginJson = "{\"login\": \"dpetrov\", \"password\": \"12345112\", \"firstName\": \"rock-lee\"}";
+        ThisTestData.createCourierForTest();
+        String busyLoginJson = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"password\": \"12345112\", \"firstName\": \""
+                + ThisTestData.nameRandomUser + "\"}"; //Неправильный пароль
 
         Response response = given()
                 .header("Content-Type", "application/json")
@@ -142,40 +142,10 @@ public class CreateCourierTest {
                 .post("/api/v1/courier");
 
         response.then().statusCode(409);
-        deleteCourierForTest();
+        ThisTestData.deleteCourierForTest();
     }
 
-    private Response createCourierForTest() {
-        String json = "{\"login\": \"dpetrov\", \"password\": \"12345\", \"firstName\": \"madara\"}";
 
-        Response response = given()
-                .header("Content-Type", "application/json")
-                .body(json)
-                .post("/api/v1/courier");
-
-        return response;
-    }
-
-    private Response loginCourierForSvaeId() {
-        String json = "{\"login\": \"dpetrov\", \"password\": \"12345\"}";
-
-        Response response = given()
-                .contentType("application/json")
-                .body(json)
-                .post("/api/v1/courier/login");
-
-        idCourier = response.then().extract().path("id");
-
-        return response;
-    }
-
-    private void deleteCourierForTest() {
-        loginCourierForSvaeId();
-
-        given()
-                .header("Content-Type", "application/json")
-                .delete("/api/v1/courier/" + idCourier);
-    }
 }
 
 
