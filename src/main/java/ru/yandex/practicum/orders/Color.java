@@ -1,4 +1,4 @@
-package оrdorcreate;
+package ru.yandex.practicum.orders;
 
 public class Color {
     private String color;

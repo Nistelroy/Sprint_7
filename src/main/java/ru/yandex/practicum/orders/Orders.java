@@ -1,4 +1,4 @@
-package оrdorcreate;
+package ru.yandex.practicum.orders;
 
 import java.util.List;
 

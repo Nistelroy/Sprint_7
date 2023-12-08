@@ -1,103 +1,105 @@
+import com.github.javafaker.Faker;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import ru.yandex.practicum.models.Courier;
+import ru.yandex.practicum.models.CourierGenerator;
 
-import java.util.Random;
-
-import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static ru.yandex.practicum.ThisTestData.BASE_URI;
+import static ru.yandex.practicum.ThisTestData.createCourierInApi;
+import static ru.yandex.practicum.ThisTestData.deleteCourierInApi;
+import static ru.yandex.practicum.ThisTestData.loginCourierInApi;
+import static ru.yandex.practicum.ThisTestData.loginCourierInApiAndSaveId;
 
 public class LoginCourierTest {
-    private int randomInt = new Random().nextInt();
+    private Courier courier;
+    private boolean needToDeleteCourier = false;
+    private Faker faker = new Faker();
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru";
+        RestAssured.baseURI = BASE_URI;
+        courier = CourierGenerator.randomCourier();
     }
 
     @Test
     @DisplayName("To authorize you need to specify the correct login")
     public void loginCourierWrongLoginStatus404() {
-        String json = "{\"login\": \"" + (ThisTestData.loginRandomUser + randomInt) + "\", \"password\": \""
-                + ThisTestData.passwordRandomUser + "\"}"; //неправильный логин
+        Response response = loginCourierInApi(courier);
 
-        ThisTestData.createCourierForTest();
-        Response response = given()
-                .contentType("application/json")
-                .body(json)
-                .post("/api/v1/courier/login");
-
-        response.then().statusCode(404);
-        ThisTestData.deleteCourierForTest();
+        response.then().statusCode(HttpStatus.SC_NOT_FOUND);
     }
 
     @Test
     @DisplayName("To authorize you need to specify the correct password")
     public void loginCourierWrongPasswordStatus404() {
-        String json = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"password\": \""
-                + (ThisTestData.passwordRandomUser + randomInt) + "\"}"; //неправильный пароль
+        String savePassForDeleteCourier = courier.getPassword();
 
-        ThisTestData.createCourierForTest();
-        Response response = given()
-                .contentType("application/json")
-                .body(json)
-                .post("/api/v1/courier/login");
+        createCourierInApi(courier);
 
-        response.then().statusCode(404);
-        ThisTestData.deleteCourierForTest();
+        courier.withPassword(faker.name().lastName()); //меняю пароль
+
+        Response response = loginCourierInApi(courier); //пробую залогинить с тем же логином и новым паролем
+
+        response.then().statusCode(SC_NOT_FOUND);
+
+        courier.withPassword(savePassForDeleteCourier); // возвращаю старый пароль, для удаления
+        needToDeleteCourier = true;
     }
 
     @Test
     @DisplayName("For authorization you need to specify a login")
     public void loginCourierNoLoginStatus400() {
-        String json = "{\"login\": \"\", \"password\": \"" + ThisTestData.passwordRandomUser + "\"}"; //пустой логин
+        courier.withLogin("");
 
-        ThisTestData.createCourierForTest();
-        Response response = given()
-                .contentType("application/json")
-                .body(json)
-                .post("/api/v1/courier/login");
+        Response response = loginCourierInApi(courier);
 
         response.then().statusCode(400);
-        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     @DisplayName("For authorization you need to specify a password")
     public void loginCourierNoPasswordStatus400() {
-        String json = "{\"login\": \"" + ThisTestData.loginRandomUser + "\", \"password\": \"\"}"; //пустой пароль
+        courier.withPassword("");
 
-        ThisTestData.createCourierForTest();
-        Response response = given()
-                .contentType("application/json")
-                .body(json)
-                .post("/api/v1/courier/login");
+        Response response = loginCourierInApi(courier);
 
         response.then().statusCode(400);
-        ThisTestData.deleteCourierForTest();
     }
 
     @Test
     @DisplayName("the courier can log in")
     public void loginExistingCourierCode200() {
-
-        ThisTestData.createCourierForTest();
-        Response response = ThisTestData.loginCourierForSaveId();
+        createCourierInApi(courier);
+        Response response = loginCourierInApiAndSaveId(courier);
 
         response.then().statusCode(200);
-        ThisTestData.deleteCourierForTest();
+
+        needToDeleteCourier = true;
     }
 
     @Test
     @DisplayName("successful login returns id")
     public void loginCourierCorrectDataIdNotNull() {
-
-        ThisTestData.createCourierForTest();
-        Response response = ThisTestData.loginCourierForSaveId();
+        createCourierInApi(courier);
+        Response response = loginCourierInApiAndSaveId(courier);
 
         response.then().assertThat().body("id", notNullValue());
-        ThisTestData.deleteCourierForTest();
+
+        needToDeleteCourier = true;
+    }
+
+    @After
+    public void deleteCourier() {
+        if (needToDeleteCourier) {
+            deleteCourierInApi(courier);
+            needToDeleteCourier = false;
+        }
     }
 }
